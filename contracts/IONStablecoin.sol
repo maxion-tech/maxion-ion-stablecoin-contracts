@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity 0.8.7;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
@@ -13,8 +13,8 @@ contract IONStablecoin is ERC20Wrapper, Pausable, AccessControl {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant ZERO_FEE_ROLE = keccak256("ZERO_FEE_ROLE");
 
-    uint256 private constant FEE_DENOMINATOR = 10**10;
-    uint256 private constant MAX_FEE = 90 * 10**8; // Max fee 90%
+    uint256 private constant FEE_DENOMINATOR = 10000000000; // 10**10
+    uint256 private constant MAX_FEE = 9000000000; // 90 * 10**8 Max fee 90%
 
     uint256 public depositFeePercent;
     uint256 public withdrawFeePercent;
