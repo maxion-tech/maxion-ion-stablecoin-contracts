@@ -2,7 +2,9 @@
   "name": "maxion-ion-stablecoin",
   "scripts": {
     "build": "hardhat compile",
-    "test": "hardhat test --network hardhat"
+    "test": "hardhat test --network hardhat",
+    "slither": "export SOLC_VERSION=0.8.9 && slither ./contracts/IONStablecoin.sol --solc-remaps '@openzeppelin=node_modules/@openzeppelin' --filter-paths 'node_modules/@openzeppelin' --exclude naming-convention,external-function,low-level-calls --ignore-compile",
+    "slither:report": "npm run slither -- --checklist > report.md"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
