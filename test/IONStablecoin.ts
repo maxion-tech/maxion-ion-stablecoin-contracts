@@ -28,6 +28,8 @@ describe("IONStablecoin", () => {
     const UnderlyingToken = await ethers.getContractFactory("ERC20Mock");
     const underlyingToken = await UnderlyingToken.deploy("USD Coin", "USDC");
 
+    await underlyingToken.deployed();
+
     // ION stablecoin
     const IONStablecoin = await ethers.getContractFactory("IONStablecoin");
     const ionStablecoin = await IONStablecoin.deploy(
@@ -37,6 +39,8 @@ describe("IONStablecoin", () => {
       INIT_DEPOSIT_FEE_PERCENT,
       INIT_WITHDRAW_FEE_PERCENT
     );
+
+    await ionStablecoin.deployed();
 
     const ZERO_FEE_ROLE = await ionStablecoin.ZERO_FEE_ROLE();
 

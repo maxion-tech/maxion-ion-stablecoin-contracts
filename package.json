@@ -2,7 +2,8 @@
   "name": "maxion-ion-stablecoin",
   "scripts": {
     "build": "hardhat compile",
-    "test": "hardhat test --network hardhat"
+    "test": "hardhat test --network hardhat",
+    "deploy:bsc-testnet": "hardhat run scripts/deploy.ts --network bscTestnet"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
