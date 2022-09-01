@@ -13,8 +13,6 @@ describe("IONStablecoin", () => {
   // and reset Hardhat Network to that snapshot in every test.
   const FEE_DENOMINATOR = 1e10; // 1e18 - 1e10 = 1e8
   const DEFAULT_ADMIN_ROLE = HashZero;
-  const PAUSER_ROLE = keccak256(toUtf8Bytes("PAUSER_ROLE"));
-  const ZERO_FEE_ROLE = keccak256(toUtf8Bytes("ZERO_FEE_ROLE"));
 
   const MAX_FEE_PERCENT = parseEther((90).toString()).div(FEE_DENOMINATOR); // 90%
   const INIT_DEPOSIT_FEE_PERCENT = 0; // 0%
@@ -40,12 +38,15 @@ describe("IONStablecoin", () => {
       INIT_WITHDRAW_FEE_PERCENT
     );
 
+    const ZERO_FEE_ROLE = await ionStablecoin.ZERO_FEE_ROLE();
+
     return {
       underlyingToken,
       ionStablecoin,
       owner,
       zeroFeeAccount,
       otherAccount,
+      ZERO_FEE_ROLE,
     };
   }
 
@@ -266,7 +267,7 @@ describe("IONStablecoin", () => {
 
   describe("Zero fee warp & unwarp", () => {
     it("Should grant ZERO_FEE role", async () => {
-      const { ionStablecoin, zeroFeeAccount } = await loadFixture(
+      const { ionStablecoin, zeroFeeAccount, ZERO_FEE_ROLE } = await loadFixture(
         deployFixture
       );
       expect(
@@ -278,7 +279,7 @@ describe("IONStablecoin", () => {
       ).to.eq(true);
     });
     it("Should warp with zero fee account", async () => {
-      const { ionStablecoin, underlyingToken, zeroFeeAccount } =
+      const { ionStablecoin, underlyingToken, zeroFeeAccount, ZERO_FEE_ROLE } =
         await loadFixture(deployFixture);
       // Set deposit fee
       const feePercent = 10; // 10%
@@ -320,7 +321,7 @@ describe("IONStablecoin", () => {
       );
     });
     it("Should unwarp with zero fee account", async () => {
-      const { ionStablecoin, underlyingToken, zeroFeeAccount } =
+      const { ionStablecoin, underlyingToken, zeroFeeAccount, ZERO_FEE_ROLE } =
         await loadFixture(deployFixture);
 
       const feePercent = 10; // 10%
