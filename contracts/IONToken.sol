@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract IONStablecoin is ERC20Wrapper, Pausable, AccessControl {
+contract IONToken is ERC20Wrapper, Pausable, AccessControl {
     using SafeMath for uint256;
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");

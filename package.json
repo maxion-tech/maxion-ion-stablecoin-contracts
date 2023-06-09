@@ -1,11 +1,15 @@
 {
-  "name": "maxion-ion-stablecoin",
+  "name": "maxion-ion-token",
   "scripts": {
     "build": "hardhat compile",
     "test": "hardhat test --network hardhat",
-    "deploy:bsc-testnet": "hardhat run scripts/deploy.ts --network bscTestnet"
+    "deploy:bsc-testnet": "hardhat run scripts/deploy.ts --network bscTestnet",
+    "deploy:bsc-mainnet": "hardhat run scripts/deploy.ts --network bsc",
+    "deploy:bsc-mainnet-hw": "source .env && hardhat run scripts/deploy_hw.ts --network bsc"
   },
   "devDependencies": {
+    "@ethersproject/hardware-wallets": "^5.7.0",
+    "@ledgerhq/hw-transport-node-hid": "^6.27.15",
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
     "@openzeppelin/contracts": "^4.7.3",
     "hardhat": "^2.10.2"

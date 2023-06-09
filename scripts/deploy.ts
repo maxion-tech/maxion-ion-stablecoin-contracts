@@ -12,16 +12,16 @@ async function main() {
     FEE_DENOMINATOR
   ); // 1%
 
-  const IONStablecoin = await ethers.getContractFactory("IONStablecoin");
-  const ionStablecoin = await IONStablecoin.deploy(
-    "ION Stablecoin",
+  const IONToken = await ethers.getContractFactory("IONToken");
+  const ionToken = await IONToken.deploy(
+    "ION Token",
     "ION",
     process.env.UNDERLYING_TOKEN_ADDRESS,
     INIT_DEPOSIT_FEE_PERCENT,
     INIT_WITHDRAW_FEE_PERCENT
   );
 
-  console.log(`ION stablecoin deployed to ${ionStablecoin.address}`);
+  console.log(`ION token deployed to ${ionToken.address}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
