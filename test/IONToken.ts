@@ -22,7 +22,7 @@ describe("IONToken", () => {
 
   async function deployFixture() {
     // Contracts are deployed using the first signer/account by default
-    const [owner, zeroFeeAccount, otherAccount] = await ethers.getSigners();
+    const [owner, adminAccount, zeroFeeAccount, otherAccount] = await ethers.getSigners();
 
     // Underlying token
     const UnderlyingToken = await ethers.getContractFactory("ERC20Mock");
@@ -37,7 +37,8 @@ describe("IONToken", () => {
       "ION",
       underlyingToken.address,
       INIT_DEPOSIT_FEE_PERCENT,
-      INIT_WITHDRAW_FEE_PERCENT
+      INIT_WITHDRAW_FEE_PERCENT,
+      adminAccount.address,
     );
 
     await ionToken.deployed();
@@ -48,6 +49,7 @@ describe("IONToken", () => {
       underlyingToken,
       ionToken,
       owner,
+      adminAccount,
       zeroFeeAccount,
       otherAccount,
       ZERO_FEE_ROLE,
@@ -56,9 +58,9 @@ describe("IONToken", () => {
 
   describe("Deployment", () => {
     it("Should set the right owner", async function () {
-      const { ionToken, owner } = await loadFixture(deployFixture);
+      const { ionToken, adminAccount } = await loadFixture(deployFixture);
       expect(
-        await ionToken.hasRole(DEFAULT_ADMIN_ROLE, owner.address)
+        await ionToken.hasRole(DEFAULT_ADMIN_ROLE, adminAccount.address)
       ).to.equal(true);
     });
 
@@ -84,52 +86,52 @@ describe("IONToken", () => {
 
   describe("Fee setter", () => {
     it("Should set deposit fee", async function () {
-      const { ionToken } = await loadFixture(deployFixture);
+      const { ionToken, adminAccount } = await loadFixture(deployFixture);
       const feePercentToSet = parseEther((10).toString()).div(FEE_DENOMINATOR); // 10%
-      await ionToken.setFee(feePercentToSet, true);
+      await ionToken.connect(adminAccount).setFee(feePercentToSet, true);
       expect(await ionToken.depositFeePercent()).to.equal(feePercentToSet);
     });
     it("Should set withdraw fee", async function () {
-      const { ionToken } = await loadFixture(deployFixture);
+      const { ionToken, adminAccount } = await loadFixture(deployFixture);
       const feePercentToSet = parseEther((10).toString()).div(FEE_DENOMINATOR); // 10%
-      await ionToken.setFee(feePercentToSet, false);
+      await ionToken.connect(adminAccount).setFee(feePercentToSet, false);
       expect(await ionToken.withdrawFeePercent()).to.equal(
         feePercentToSet
       );
     });
     it("Should reverted if set deposit fee reach max fee percent", async function () {
-      const { ionToken } = await loadFixture(deployFixture);
+      const { ionToken, adminAccount } = await loadFixture(deployFixture);
       const feePercentToSet = parseEther(
         MAX_FEE_PERCENT.add(
           parseEther((1).toString()).div(FEE_DENOMINATOR)
         ).toString()
       ).div(FEE_DENOMINATOR); // Max + 1 %
       await expect(
-        ionToken.setFee(feePercentToSet, true)
+        ionToken.connect(adminAccount).setFee(feePercentToSet, true)
       ).to.be.revertedWith("Max fee reach");
     });
     it("Should reverted if set withdraw fee reach max fee percent", async function () {
-      const { ionToken } = await loadFixture(deployFixture);
+      const { ionToken, adminAccount } = await loadFixture(deployFixture);
       const feePercentToSet = parseEther(
         MAX_FEE_PERCENT.add(
           parseEther((1).toString()).div(FEE_DENOMINATOR)
         ).toString()
       ).div(FEE_DENOMINATOR); // Max + 1 %
       await expect(
-        ionToken.setFee(feePercentToSet, false)
+        ionToken.connect(adminAccount).setFee(feePercentToSet, false)
       ).to.be.revertedWith("Max fee reach");
     });
   });
 
   describe("Wrapping", () => {
     const wrappingTest = async (feePercent: number) => {
-      const { ionToken, underlyingToken, otherAccount } =
+      const { ionToken, adminAccount, underlyingToken, otherAccount } =
         await loadFixture(deployFixture);
       // Set deposit fee
       const feePercentToSet = parseEther(feePercent.toString()).div(
         FEE_DENOMINATOR
       );
-      await ionToken.setFee(feePercentToSet, true);
+      await ionToken.connect(adminAccount).setFee(feePercentToSet, true);
       expect(await ionToken.depositFeePercent()).to.equal(feePercentToSet);
       // Mint underlying token to other account
       await underlyingToken.mint(otherAccount.address, parseEther("100"));
@@ -195,15 +197,15 @@ describe("IONToken", () => {
 
   describe("Unwrapping", () => {
     const unwrappingTest = async (feePercent: number) => {
-      const { ionToken, underlyingToken, otherAccount } =
+      const { ionToken, underlyingToken, otherAccount, adminAccount } =
         await loadFixture(deployFixture);
       // Set deposit fee to zero
-      await ionToken.setFee(0, true);
+      await ionToken.connect(adminAccount).setFee(0, true);
       // Set withdraw fee
       const feePercentToSet = parseEther(feePercent.toString()).div(
         FEE_DENOMINATOR
       );
-      await ionToken.setFee(feePercentToSet, false);
+      await ionToken.connect(adminAccount).setFee(feePercentToSet, false);
       expect(await ionToken.withdrawFeePercent()).to.equal(
         feePercentToSet
       );
@@ -271,26 +273,26 @@ describe("IONToken", () => {
 
   describe("Zero fee warp & unwarp", () => {
     it("Should grant ZERO_FEE role", async () => {
-      const { ionToken, zeroFeeAccount, ZERO_FEE_ROLE } = await loadFixture(
+      const { ionToken, adminAccount, zeroFeeAccount, ZERO_FEE_ROLE } = await loadFixture(
         deployFixture
       );
       expect(
         await ionToken.hasRole(ZERO_FEE_ROLE, zeroFeeAccount.address)
       ).to.eq(false);
-      await ionToken.grantRole(ZERO_FEE_ROLE, zeroFeeAccount.address);
+      await ionToken.connect(adminAccount).grantRole(ZERO_FEE_ROLE, zeroFeeAccount.address);
       expect(
         await ionToken.hasRole(ZERO_FEE_ROLE, zeroFeeAccount.address)
       ).to.eq(true);
     });
     it("Should warp with zero fee account", async () => {
-      const { ionToken, underlyingToken, zeroFeeAccount, ZERO_FEE_ROLE } =
+      const { ionToken, underlyingToken, adminAccount, zeroFeeAccount, ZERO_FEE_ROLE } =
         await loadFixture(deployFixture);
       // Set deposit fee
       const feePercent = 10; // 10%
       const feePercentToSet = parseEther(feePercent.toString()).div(
         FEE_DENOMINATOR
       );
-      await ionToken.setFee(feePercentToSet, true);
+      await ionToken.connect(adminAccount).setFee(feePercentToSet, true);
       expect(
         (
           await ionToken
@@ -299,7 +301,7 @@ describe("IONToken", () => {
         ).amountAfterFee
       ).to.eq(parseEther("90"));
       // Grant ZERO_FEE role to zero fee account
-      await ionToken.grantRole(ZERO_FEE_ROLE, zeroFeeAccount.address);
+      await ionToken.connect(adminAccount).grantRole(ZERO_FEE_ROLE, zeroFeeAccount.address);
       expect(
         (
           await ionToken
@@ -325,7 +327,7 @@ describe("IONToken", () => {
       );
     });
     it("Should unwarp with zero fee account", async () => {
-      const { ionToken, underlyingToken, zeroFeeAccount, ZERO_FEE_ROLE } =
+      const { ionToken, adminAccount, underlyingToken, zeroFeeAccount, ZERO_FEE_ROLE } =
         await loadFixture(deployFixture);
 
       const feePercent = 10; // 10%
@@ -333,9 +335,9 @@ describe("IONToken", () => {
         FEE_DENOMINATOR
       );
       // Set deposit fee
-      await ionToken.setFee(0, true);
+      await ionToken.connect(adminAccount).setFee(0, true);
       // Set withdraw fee
-      await ionToken.setFee(feePercentToSet, false);
+      await ionToken.connect(adminAccount).setFee(feePercentToSet, false);
       expect(
         (
           await ionToken
@@ -344,7 +346,7 @@ describe("IONToken", () => {
         ).amountAfterFee
       ).to.eq(parseEther("90"));
       // Grant ZERO_FEE role to zero fee account
-      await ionToken.grantRole(ZERO_FEE_ROLE, zeroFeeAccount.address);
+      await ionToken.connect(adminAccount).grantRole(ZERO_FEE_ROLE, zeroFeeAccount.address);
       expect(
         (
           await ionToken
@@ -375,14 +377,14 @@ describe("IONToken", () => {
 
   describe("Fee withdrawal by admin", () => {
     it("Should admin withdraw fee", async () => {
-      const { ionToken, underlyingToken, owner, otherAccount } =
+      const { ionToken, underlyingToken, adminAccount, otherAccount } =
         await loadFixture(deployFixture);
       // Set deposit fee
       const feePercent = 10; // 10%
       const feePercentToSet = parseEther(feePercent.toString()).div(
         FEE_DENOMINATOR
       );
-      await ionToken.setFee(feePercentToSet, true);
+      await ionToken.connect(adminAccount).setFee(feePercentToSet, true);
       // Mint underlying to other account
       await underlyingToken.mint(otherAccount.address, parseEther("100"));
       // Other account approve underlying to warpper
@@ -400,8 +402,8 @@ describe("IONToken", () => {
 
       expect(await ionToken.feeBalance()).to.eq(fee);
       // Withdraw fee by admin
-      await ionToken.withdrawFee(owner.address);
-      expect(await underlyingToken.balanceOf(owner.address)).to.eq(fee);
+      await ionToken.connect(adminAccount).withdrawFee(adminAccount.address);
+      expect(await underlyingToken.balanceOf(adminAccount.address)).to.eq(fee);
     });
   });
 });

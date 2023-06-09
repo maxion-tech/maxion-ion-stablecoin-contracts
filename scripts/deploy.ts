@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 const { parseEther } = ethers.utils;
 
 async function main() {
-  if (!process.env.UNDERLYING_TOKEN_ADDRESS)
+  if (!process.env.UNDERLYING_TOKEN_ADDRESS || !process.env.ADMIN_ADDRESS)
     throw new Error("Please make sure all environment variable is loaded");
 
   const FEE_DENOMINATOR = 1e10; // 1e18 - 1e10 = 1e8
@@ -18,7 +18,8 @@ async function main() {
     "ION",
     process.env.UNDERLYING_TOKEN_ADDRESS,
     INIT_DEPOSIT_FEE_PERCENT,
-    INIT_WITHDRAW_FEE_PERCENT
+    INIT_WITHDRAW_FEE_PERCENT,
+    process.env.ADMIN_ADDRESS,
   );
 
   console.log(`ION token deployed to ${ionToken.address}`);
