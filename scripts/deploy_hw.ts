@@ -39,6 +39,8 @@ async function main() {
     );
 
     console.log(`ION token deployed to ${ionToken.address} on ${hre.network.name}`);
+
+    console.log(`Verify contract by running: npx hardhat verify --network ${hre.network.name} ${ionToken.address} "ION Token" "ION" "${process.env.UNDERLYING_TOKEN_ADDRESS}" ${INIT_DEPOSIT_FEE_PERCENT} ${INIT_WITHDRAW_FEE_PERCENT} ${process.env.ADMIN_ADDRESS}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

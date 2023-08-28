@@ -3,9 +3,10 @@
   "scripts": {
     "build": "hardhat compile",
     "test": "hardhat test --network hardhat",
-    "deploy:bsc-testnet": "hardhat run scripts/deploy.ts --network bscTestnet",
-    "deploy:bsc-mainnet": "hardhat run scripts/deploy.ts --network bsc",
-    "deploy:bsc-mainnet-hw": "source .env.mainnet && hardhat run scripts/deploy_hw.ts --network bsc"
+    "deploy:bsc-testnet": "source .env && hardhat run scripts/deploy.ts --network bscTestnet",
+    "deploy:bsc-testnet:hw": "source .env && hardhat run scripts/deploy_hw.ts --network bscTestnet",
+    "deploy:bsc-mainnet": "source .env.mainnet && hardhat run scripts/deploy.ts --network bsc",
+    "deploy:bsc-mainnet:hw": "source .env.mainnet && hardhat run scripts/deploy_hw.ts --network bsc"
   },
   "devDependencies": {
     "@ethersproject/hardware-wallets": "^5.7.0",
